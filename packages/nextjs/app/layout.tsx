@@ -6,8 +6,9 @@ import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
 export const metadata = getMetadata({
-  title: "Scaffold-ETH 2 App",
-  description: "Built with 🏗 Scaffold-ETH 2",
+  title: "EnvioPilot - MetaMask ERC-7715 + Envio HyperIndex",
+  description:
+    "Experience the future of Web3 with ERC-7715 Advanced Permissions and real-time blockchain event indexing powered by Envio",
 });
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {

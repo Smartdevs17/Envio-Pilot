@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "~~/app/erc-7715-permissions/_components/Button";
 import { PermissionBlock } from "~~/app/erc-7715-permissions/_components/PermissionBlock";
 import { usePermissions } from "~~/app/erc-7715-permissions/hooks/usePermissions";
@@ -12,6 +13,9 @@ export const Steps = (): React.JSX.Element => {
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight text-base-content">ERC-7715 Permissions</h1>
         <p className="mt-2 text-base text-base-content">Execute transactions on behalf of MetaMask users</p>
+        <Link href="/dashboard" className="btn btn-sm btn-ghost mt-2">
+          ← Back to Dashboard
+        </Link>
       </div>
 
       <div className="w-full flex flex-col min-h-screen gap-4">
@@ -22,6 +26,16 @@ export const Steps = (): React.JSX.Element => {
 
               <div className="space-y-4">
                 <PermissionBlock permission={grantedPermissions} />
+              </div>
+
+              <div className="mt-6 p-4 bg-success/10 border border-success/20 rounded-lg">
+                <p className="text-sm text-center">
+                  ✅ Permission granted successfully! Your event will be indexed by Envio shortly.
+                  <br />
+                  <Link href="/dashboard" className="btn btn-primary btn-sm mt-3">
+                    📊 View Dashboard
+                  </Link>
+                </p>
               </div>
             </div>
           </div>
@@ -44,7 +58,7 @@ export const Steps = (): React.JSX.Element => {
               <p className="text-base-content">
                 Please make sure your account is upgraded to a smart account before requesting permissions.
                 <a
-                  href="hhttps://support.metamask.io/configure/accounts/switch-to-or-revert-from-a-smart-account/#how-to-switch-to-a-metamask-smart-account"
+                  href="https://support.metamask.io/configure/accounts/switch-to-or-revert-from-a-smart-account/#how-to-switch-to-a-metamask-smart-account"
                   target="_blank"
                   className="text-primary hover:text-accent"
                 >
