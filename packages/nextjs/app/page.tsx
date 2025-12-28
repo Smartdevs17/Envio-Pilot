@@ -15,7 +15,7 @@ const Home: NextPage = () => {
         <div className="px-5 w-full">
           <div className="flex flex-col items-center justify-center">
             <h1 className="text-center mb-8">
-              <span className="block text-5xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <span className="block text-5xl font-bold mb-2 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
                 EnvioPilot
               </span>
               <span className="block text-2xl text-base-content/70">

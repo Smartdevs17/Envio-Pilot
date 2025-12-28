@@ -25,6 +25,14 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/dashboard",
   },
   {
+    label: "DCA Orders",
+    href: "/dca",
+  },
+  {
+    label: "Actions",
+    href: "/actions",
+  },
+  {
     label: "Permissions",
     href: "/erc-7715-permissions",
   },
