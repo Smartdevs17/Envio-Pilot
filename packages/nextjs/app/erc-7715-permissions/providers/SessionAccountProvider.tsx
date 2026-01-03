@@ -31,7 +31,7 @@ export const SessionAccountProvider = ({ children }: { children: React.ReactNode
 
   useEffect(() => {
     createSessionAccount();
-  }, []);
+  }, [createSessionAccount]);
 
   return <SessionAccountContext.Provider value={{ sessionAccount }}>{children}</SessionAccountContext.Provider>;
 };
