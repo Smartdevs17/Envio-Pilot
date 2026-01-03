@@ -3,7 +3,7 @@
 <h4 align="center">
   <a href="https://docs.scaffoldeth.io">Documentation</a> |
   <a href="https://scaffoldeth.io">Website</a> |
-  <a href="https://envio-pilot-oz9lju1jy-smartdevs17s-projects.vercel.app/">Live App</a>
+  <a href="https://envio-pilot-9gv6rrmvh-smartdevs17s-projects.vercel.app">Live App</a>
 </h4>
 
 🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
