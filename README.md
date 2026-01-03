@@ -94,8 +94,19 @@ We've documented our journey and feedback regarding the integration of MetaMask 
 
 ### 📱 Social Media
 Check out our project journey and demonstration on X!
-- **Project Post**: [X Post Link](https://x.com/smartdev_x/status/2007208716341514404)
-- **Tag**: [@MetaMaskDev](https://x.com/MetaMaskDev)
+
+- **Project Journey**:
+    - [Main Submission Post](https://x.com/smartdev_x/status/2007208716341514404)
+    - [Advanced Permissions Intro](https://x.com/smartdev_x/status/2005097059536568577)
+    - [Envio Integration Update](https://x.com/smartdev_x/status/2006083152893338041)
+    - [AI Agent Demonstration](https://x.com/smartdev_x/status/2005641417801273592)
+    - [DCA Automation Features](https://x.com/smartdev_x/status/2005538922944934001)
+    - [Workflow Optimization](https://x.com/smartdev_x/status/2005539987723604112)
+    - [Initial Prototype](https://x.com/smartdev_x/status/2004628981471936843)
+    - [Community Feedback](https://x.com/smartdev_x/status/2004851164119269895)
+    - [Project Kickoff](https://x.com/smartdev_x/status/2002309188513333495)
+
+- **Official Tag**: [@MetaMaskDev](https://x.com/MetaMaskDev)
 
 ---
 
