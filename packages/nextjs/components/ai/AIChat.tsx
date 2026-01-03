@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
+import { usePermissions } from "~~/app/erc-7715-permissions/hooks/usePermissions";
 import { type AIMessage, processAIMessage } from "~~/services/ai/aiService";
+import { parseDCAIntent, prepareDCATransaction } from "~~/services/ai/contractExecutionService";
 
 export function AIChat() {
   const { address, isConnected } = useAccount();
@@ -25,43 +27,92 @@ export function AIChat() {
     scrollToBottom();
   }, [messages]);
 
+  const { writeContractAsync } = useWriteContract();
+  const { grantedPermissions } = usePermissions();
+  const [pendingAction, setPendingAction] = useState<{ type: string; data: any } | null>(null);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage = input.trim();
+    const userMessage = input.trim().toLowerCase();
     setInput("");
 
     // Add user message to chat
-    const newMessages: AIMessage[] = [...messages, { role: "user", content: userMessage }];
+    const newMessages: AIMessage[] = [...messages, { role: "user", content: input.trim() }];
     setMessages(newMessages);
     setIsLoading(true);
 
     try {
+      // Check if this is a confirmation for a pending action
+      if (pendingAction && (userMessage === "yes" || userMessage === "confirm" || userMessage === "proceed")) {
+        setMessages(prev => [...prev, { role: "assistant", content: "🚀 Executing your request..." }]);
+
+        let hash: string | undefined;
+
+        if (pendingAction.type === "dca") {
+          const params = parseDCAIntent(messages[messages.length - 1].content);
+          if (params && params.amount) {
+            const tx = prepareDCATransaction({
+              amount: params.amount,
+              interval: params.interval || "weekly",
+              tokenPair: params.tokenPair || "ETH/USDC",
+            });
+
+            // If we have permissions, try to redeem/delegate
+            if (grantedPermissions && grantedPermissions.length > 0) {
+              // This is a simplified version, ideally we'd use a generic redeem helper
+              // For now, we'll use the standard write if redeem logic isn't generic yet
+              hash = await writeContractAsync(tx);
+            } else {
+              hash = await writeContractAsync(tx);
+            }
+          }
+        } else if (pendingAction.type === "trade") {
+          // Similar logic for trade...
+          setMessages(prev => [
+            ...prev,
+            {
+              role: "assistant",
+              content: "Execution for manual trades is still being refined. Please use the 'Trade' page for now.",
+            },
+          ]);
+          setIsLoading(false);
+          setPendingAction(null);
+          return;
+        }
+
+        if (hash) {
+          setMessages(prev => [
+            ...prev,
+            {
+              role: "assistant",
+              content: `✅ Success! Your DCA order has been submitted. Envio will index it shortly.\n\n[View on Etherscan](https://sepolia.etherscan.io/tx/${hash})`,
+            },
+          ]);
+        }
+        setPendingAction(null);
+        setIsLoading(false);
+        return;
+      }
+
       // Process with AI
-      const response = await processAIMessage(userMessage, address, messages);
+      const response = await processAIMessage(input.trim(), address, messages);
 
       // Add AI response
       setMessages([...newMessages, { role: "assistant", content: response.message }]);
 
       // Handle action if needed
       if (response.action) {
-        // Show action feedback
-        setTimeout(() => {
-          setMessages(prev => [
-            ...prev,
-            {
-              role: "assistant",
-              content: `💡 **Action detected:** This would execute a ${response.action?.type} action. Ready to proceed?`,
-            },
-          ]);
-        }, 500);
+        setPendingAction({ type: response.action.data.intent, data: response.action.data });
+        // The AI already asks "Shall I proceed?" based on the system prompt
       }
-    } catch {
-      setMessages([
-        ...newMessages,
+    } catch (err: any) {
+      console.error("Chat error:", err);
+      setMessages(prev => [
+        ...prev,
         {
           role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
+          content: `Sorry, I encountered an error: ${err.message || "Please try again."}`,
         },
       ]);
     } finally {

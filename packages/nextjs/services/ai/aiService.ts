@@ -120,9 +120,9 @@ Use this context to provide accurate, personalized responses.
  */
 function detectActionIntent(message: string): string | null {
   const executionKeywords = {
-    dca: ["create dca", "set up dca", "dca order", "buy every"],
-    trade: ["buy", "sell", "swap", "trade"],
-    permission: ["grant permission", "approve", "allow"],
+    dca: ["create dca", "set up dca", "dca order", "buy every", "recurring swap", "automated dca"],
+    trade: ["buy", "sell", "swap", "trade", "exchange"],
+    permission: ["grant permission", "approve", "allow", "request permission"],
   };
 
   for (const [intent, keywords] of Object.entries(executionKeywords)) {
