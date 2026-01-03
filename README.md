@@ -83,8 +83,7 @@ We use Envio's hyper-fast indexing to power our **AI Agent**, providing users wi
 - **Real-time Awareness**: The AI Agent queries Envio to understand the user's current state (e.g., "What are my active permissions?") and provides personalized trading advice.
 - **Event Indexing**: We index `PermissionGranted`, `TradeExecuted`, and `DCAOrderCreated` events.
 - **Code Links**:
-  - [Envio Indexer Configuration](https://github.com/smartdev_x/envio-pilot/blob/main/backend/config.yaml)
-  *Note: Replace with your actual repo link*
+- [Envio Indexer Configuration](https://github.com/Smartdevs17/envio-pilot-backend/blob/main/config.yaml)
   - [AI Envio Query Service](https://github.com/smartdev_x/envio-pilot/blob/main/frontend/packages/nextjs/services/ai/envioQueryService.ts)
 
 ### 💬 Feedback
