@@ -58,12 +58,26 @@ export function AIChat() {
         let hash: string | undefined;
 
         if (pendingAction.type === "dca" && pendingAction.params) {
-          const tx = prepareDCATransaction({
-            amount: pendingAction.params.amount,
-            interval: pendingAction.params.interval || "weekly",
-            tokenPair: pendingAction.params.tokenPair || "ETH/USDC",
-          });
-          hash = await writeContractAsync(tx);
+          try {
+            const tx = prepareDCATransaction({
+              amount: pendingAction.params.amount,
+              interval: pendingAction.params.interval || "daily",
+              tokenPair: pendingAction.params.tokenPair || "ETH/USDC",
+            });
+            hash = await writeContractAsync(tx);
+          } catch (execErr: any) {
+            console.error("Execution error:", execErr);
+            setMessages(prev => [
+              ...prev,
+              {
+                role: "assistant",
+                content: `❌ Execution failed: ${execErr.shortMessage || execErr.message || "Unknown error"}. Please check your connection and wallet balance.`,
+              },
+            ]);
+            setPendingAction(null);
+            setIsLoading(false);
+            return;
+          }
         } else if (pendingAction.type === "trade") {
           // ... (Trade logic if needed)
         }
@@ -101,11 +115,15 @@ export function AIChat() {
       }
     } catch (err: any) {
       console.error("Chat error:", err);
+      const errorMessage = err.message?.includes("401")
+        ? "🔑 RPC Error: Unauthorized. Your Alchemy API key might be invalid or restricted."
+        : err.shortMessage || err.message || "Please try again.";
+
       setMessages(prev => [
         ...prev,
         {
           role: "assistant",
-          content: `Sorry, I encountered an error: ${err.message || "Please try again."}`,
+          content: `Sorry, I encountered an error: ${errorMessage}`,
         },
       ]);
     } finally {
