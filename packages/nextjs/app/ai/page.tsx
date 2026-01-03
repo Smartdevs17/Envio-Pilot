@@ -207,7 +207,34 @@ export default function AIPage() {
                       : "bg-base-100 shadow-lg border border-base-300"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content.split("\n\n🔗")[0]}</p>
+
+                  {msg.content.includes("https://sepolia.etherscan.io/tx/") && (
+                    <div className="mt-4 pt-4 border-t border-base-300/50">
+                      <a
+                        href={msg.content.match(/https:\/\/sepolia\.etherscan\.io\/tx\/0x[a-fA-F0-0]*/)?.[0] || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-sm btn-secondary w-full gap-2 shadow-md hover:scale-[1.02] transition-transform"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          stroke="currentColor"
+                          className="w-4 h-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                          />
+                        </svg>
+                        View on Sepolia Etherscan
+                      </a>
+                    </div>
+                  )}
                 </div>
                 {msg.role === "user" && (
                   <div className="w-10 h-10 rounded-full bg-neutral flex items-center justify-center flex-shrink-0 shadow-lg">
