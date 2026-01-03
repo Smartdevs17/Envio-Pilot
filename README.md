@@ -67,6 +67,38 @@ Run smart contract test with `yarn hardhat:test`
 - Edit your deployment scripts in `packages/hardhat/deploy`
 
 
+## Hackathon Requirements
+
+### 🔐 Advanced Permissions Usage (ERC-7715)
+EnvioPilot leverages MetaMask's Advanced Permissions to enable a seamless "Set & Forget" trading experience. Users grant a periodic allowance and execution permission to a session account, which then executes trades on their behalf without requiring manual confirmation for every transaction.
+
+- **Requesting Permissions**: We use `erc7715ProviderActions` to request periodic native token allowances.
+  - [Code: Request Permissions](https://github.com/smartdev_x/envio-pilot/blob/main/frontend/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L45-L120)
+- **Redeeming Permissions**: We use `erc7710BundlerActions` and `sendUserOperationWithDelegation` to execute trades using the granted permissions.
+  - [Code: Redeeming Permissions](https://github.com/smartdev_x/envio-pilot/blob/main/frontend/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L122-L212)
+
+### 📊 Envio Usage
+We use Envio's hyper-fast indexing to power our **AI Agent**, providing users with real-time data about their permissions, trades, and DCA orders.
+
+- **Real-time Awareness**: The AI Agent queries Envio to understand the user's current state (e.g., "What are my active permissions?") and provides personalized trading advice.
+- **Event Indexing**: We index `PermissionGranted`, `TradeExecuted`, and `DCAOrderCreated` events.
+- **Code Links**:
+  - [Envio Indexer Configuration](https://github.com/smartdev_x/envio-pilot/blob/main/backend/config.yaml)
+  *Note: Replace with your actual repo link*
+  - [AI Envio Query Service](https://github.com/smartdev_x/envio-pilot/blob/main/frontend/packages/nextjs/services/ai/envioQueryService.ts)
+
+### 💬 Feedback
+We've documented our journey and feedback regarding the integration of MetaMask Advanced Permissions and Envio.
+- **Journey & Feedback**: [HackMD Feedback Link](https://hackmd.io/placeholder)
+- **GitHub Issue**: We've identified a need for standardized context management in the `smart-accounts-kit`.
+
+### 📱 Social Media
+Check out our project journey and demonstration on X!
+- **Project Post**: [X Post Link](https://x.com/smartdev_x/status/2007208716341514404)
+- **Tag**: [@MetaMaskDev](https://x.com/MetaMaskDev)
+
+---
+
 ## Documentation
 
 Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
