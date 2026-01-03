@@ -1,10 +1,57 @@
-# 🏗 Scaffold-ETH 2
+# 🏗 Envio Pilot
 
 <h4 align="center">
   <a href="https://docs.scaffoldeth.io">Documentation</a> |
   <a href="https://scaffoldeth.io">Website</a> |
   <a href="https://envio-pilot-9gv6rrmvh-smartdevs17s-projects.vercel.app">Live App</a>
 </h4>
+
+---
+
+## Hackathon Requirements
+
+### 🔐 Advanced Permissions Usage (ERC-7715)
+EnvioPilot leverages MetaMask's Advanced Permissions to enable a seamless "Set & Forget" trading experience. Users grant a periodic allowance and execution permission to a session account, which then executes trades on their behalf without requiring manual confirmation for every transaction.
+
+- **Smart Contracts Repository**: [GitHub: envio-pilot-contracts](https://github.com/Smartdevs17/envio-pilot-contracts)
+- **Requesting Permissions**: We use `erc7715ProviderActions` to request periodic native token allowances.
+  - [Code: Request Permissions](https://github.com/Smartdevs17/Envio-Pilot/blob/main/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L45-L120)
+- **Redeeming Permissions**: We use `erc7710BundlerActions` and `sendUserOperationWithDelegation` to execute trades using the granted permissions.
+  - [Code: Redeeming Permissions](https://github.com/Smartdevs17/Envio-Pilot/blob/main/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L122-L212)
+
+### 📊 Envio Usage
+We use Envio's hyper-fast indexing to power our **AI Agent**, providing users with real-time data about their permissions, trades, and DCA orders.
+
+- **Real-time Awareness**: The AI Agent queries Envio to understand the user's current state (e.g., "What are my active permissions?") and provides personalized trading advice.
+- **Event Indexing**: We index `PermissionGranted`, `TradeExecuted`, and `DCAOrderCreated` events.
+- **Code Links**:
+- [Envio Indexer Configuration](https://github.com/Smartdevs17/envio-pilot-backend/blob/main/config.yaml)
+  - [AI Envio Query Service](https://github.com/Smartdevs17/Envio-Pilot/blob/main/packages/nextjs/services/ai/envioQueryService.ts)
+
+### 💬 Feedback
+We've documented our journey and feedback regarding the integration of MetaMask Advanced Permissions and Envio.
+- **Journey & Feedback**: [HackMD Feedback](https://hackmd.io/@ellcs/B1pebUlPd)
+- **GitHub Issue**: We've opened an issue regarding the need for standardized context management in the `smart-accounts-kit`: [Issue #121](https://github.com/MetaMask/smart-accounts-kit/issues/121)
+
+### 📱 Social Media
+Check out our project journey and demonstration on X!
+
+- **Project Journey**:
+    - [Main Submission Post](https://x.com/smartdev_x/status/2007208716341514404)
+    - [Advanced Permissions Intro](https://x.com/smartdev_x/status/2005097059536568577)
+    - [Envio Integration Update](https://x.com/smartdev_x/status/2006083152893338041)
+    - [AI Agent Demonstration](https://x.com/smartdev_x/status/2005641417801273592)
+    - [DCA Automation Features](https://x.com/smartdev_x/status/2005538922944934001)
+    - [Workflow Optimization](https://x.com/smartdev_x/status/2005539987723604112)
+    - [Initial Prototype](https://x.com/smartdev_x/status/2004628981471936843)
+    - [Community Feedback](https://x.com/smartdev_x/status/2004851164119269895)
+    - [Project Kickoff](https://x.com/smartdev_x/status/2002309188513333495)
+
+- **Official Tag**: [@MetaMaskDev](https://x.com/MetaMaskDev)
+
+---
+
+## About Scaffold-ETH 2
 
 🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
 
@@ -66,48 +113,6 @@ Run smart contract test with `yarn hardhat:test`
 - Edit your smart contracts in `packages/hardhat/contracts`
 - Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
 - Edit your deployment scripts in `packages/hardhat/deploy`
-
-
-## Hackathon Requirements
-
-### 🔐 Advanced Permissions Usage (ERC-7715)
-EnvioPilot leverages MetaMask's Advanced Permissions to enable a seamless "Set & Forget" trading experience. Users grant a periodic allowance and execution permission to a session account, which then executes trades on their behalf without requiring manual confirmation for every transaction.
-
-- **Smart Contracts Repository**: [GitHub: envio-pilot-contracts](https://github.com/Smartdevs17/envio-pilot-contracts)
-- **Requesting Permissions**: We use `erc7715ProviderActions` to request periodic native token allowances.
-  - [Code: Request Permissions](https://github.com/Smartdevs17/Envio-Pilot/blob/main/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L45-L120)
-- **Redeeming Permissions**: We use `erc7710BundlerActions` and `sendUserOperationWithDelegation` to execute trades using the granted permissions.
-  - [Code: Redeeming Permissions](https://github.com/Smartdevs17/Envio-Pilot/blob/main/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L122-L212)
-
-### 📊 Envio Usage
-We use Envio's hyper-fast indexing to power our **AI Agent**, providing users with real-time data about their permissions, trades, and DCA orders.
-
-- **Real-time Awareness**: The AI Agent queries Envio to understand the user's current state (e.g., "What are my active permissions?") and provides personalized trading advice.
-- **Event Indexing**: We index `PermissionGranted`, `TradeExecuted`, and `DCAOrderCreated` events.
-- **Code Links**:
-- [Envio Indexer Configuration](https://github.com/Smartdevs17/envio-pilot-backend/blob/main/config.yaml)
-  - [AI Envio Query Service](https://github.com/Smartdevs17/Envio-Pilot/blob/main/packages/nextjs/services/ai/envioQueryService.ts)
-
-### 💬 Feedback
-We've documented our journey and feedback regarding the integration of MetaMask Advanced Permissions and Envio.
-- **Journey & Feedback**: [HackMD Feedback](https://hackmd.io/@ellcs/B1pebUlPd)
-- **GitHub Issue**: We've opened an issue regarding the need for standardized context management in the `smart-accounts-kit`: [Issue #121](https://github.com/MetaMask/smart-accounts-kit/issues/121)
-
-### 📱 Social Media
-Check out our project journey and demonstration on X!
-
-- **Project Journey**:
-    - [Main Submission Post](https://x.com/smartdev_x/status/2007208716341514404)
-    - [Advanced Permissions Intro](https://x.com/smartdev_x/status/2005097059536568577)
-    - [Envio Integration Update](https://x.com/smartdev_x/status/2006083152893338041)
-    - [AI Agent Demonstration](https://x.com/smartdev_x/status/2005641417801273592)
-    - [DCA Automation Features](https://x.com/smartdev_x/status/2005538922944934001)
-    - [Workflow Optimization](https://x.com/smartdev_x/status/2005539987723604112)
-    - [Initial Prototype](https://x.com/smartdev_x/status/2004628981471936843)
-    - [Community Feedback](https://x.com/smartdev_x/status/2004851164119269895)
-    - [Project Kickoff](https://x.com/smartdev_x/status/2002309188513333495)
-
-- **Official Tag**: [@MetaMaskDev](https://x.com/MetaMaskDev)
 
 ---
 
