@@ -75,9 +75,9 @@ EnvioPilot leverages MetaMask's Advanced Permissions to enable a seamless "Set &
 
 - **Smart Contracts Repository**: [GitHub: envio-pilot-contracts](https://github.com/Smartdevs17/envio-pilot-contracts)
 - **Requesting Permissions**: We use `erc7715ProviderActions` to request periodic native token allowances.
-  - [Code: Request Permissions](https://github.com/smartdev_x/envio-pilot/blob/main/frontend/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L45-L120)
+  - [Code: Request Permissions](https://github.com/Smartdevs17/frontend/blob/main/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L45-L120)
 - **Redeeming Permissions**: We use `erc7710BundlerActions` and `sendUserOperationWithDelegation` to execute trades using the granted permissions.
-  - [Code: Redeeming Permissions](https://github.com/smartdev_x/envio-pilot/blob/main/frontend/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L122-L212)
+  - [Code: Redeeming Permissions](https://github.com/Smartdevs17/frontend/blob/main/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L122-L212)
 
 ### 📊 Envio Usage
 We use Envio's hyper-fast indexing to power our **AI Agent**, providing users with real-time data about their permissions, trades, and DCA orders.
@@ -86,7 +86,7 @@ We use Envio's hyper-fast indexing to power our **AI Agent**, providing users wi
 - **Event Indexing**: We index `PermissionGranted`, `TradeExecuted`, and `DCAOrderCreated` events.
 - **Code Links**:
 - [Envio Indexer Configuration](https://github.com/Smartdevs17/envio-pilot-backend/blob/main/config.yaml)
-  - [AI Envio Query Service](https://github.com/smartdev_x/envio-pilot/blob/main/frontend/packages/nextjs/services/ai/envioQueryService.ts)
+  - [AI Envio Query Service](https://github.com/Smartdevs17/frontend/blob/main/packages/nextjs/services/ai/envioQueryService.ts)
 
 ### 💬 Feedback
 We've documented our journey and feedback regarding the integration of MetaMask Advanced Permissions and Envio.
