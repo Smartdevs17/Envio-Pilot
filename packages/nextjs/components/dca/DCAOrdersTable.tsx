@@ -1,22 +1,57 @@
 "use client";
 
-import { useAccount } from "wagmi";
-import { DCAOrderCreated, useDCAOrders } from "~~/hooks/useDCAData";
+import { useAccount, useWriteContract } from "wagmi";
+import { DCAOrderCreated, useDCAExecutions, useDCAOrders } from "~~/hooks/useDCAData";
 
 export function DCAOrdersTable() {
   const { address } = useAccount();
-  const { data: orders, loading, error, refetch } = useDCAOrders();
+  const { data: orders, loading: ordersLoading, error, refetch: refetchOrders } = useDCAOrders();
+  const { data: executions, loading: execsLoading, refetch: refetchExecs } = useDCAExecutions();
+  const { writeContractAsync, isPending } = useWriteContract();
+
+  const loading = ordersLoading || execsLoading;
 
   // Filter to show only user's orders
   const userOrders =
     orders?.filter((order: DCAOrderCreated) => order.user.toLowerCase() === address?.toLowerCase()) || [];
+
+  const handleExecute = async (orderId: string) => {
+    try {
+      await writeContractAsync({
+        address: "0xF6Ee0a3a8Ea1fE73D0DFfac8419bF676276D56cB",
+        abi: [
+          {
+            inputs: [{ name: "orderId", type: "uint256" }],
+            name: "executeDCAOrder",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        functionName: "executeDCAOrder",
+        args: [BigInt(orderId)],
+      });
+      // Refresh data after execution
+      setTimeout(() => {
+        refetchOrders();
+        refetchExecs();
+      }, 2000);
+    } catch (err) {
+      console.error("Execution error:", err);
+    }
+  };
+
+  const refetchAll = () => {
+    refetchOrders();
+    refetchExecs();
+  };
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-bold">📋 Your DCA Orders</h3>
-        <button onClick={refetch} className="btn btn-sm btn-outline" disabled={loading}>
+        <button onClick={refetchAll} className="btn btn-sm btn-outline" disabled={loading}>
           {loading ? "..." : "↻ Refresh"}
         </button>
       </div>
@@ -55,11 +90,14 @@ export function DCAOrdersTable() {
                 <th>Frequency</th>
                 <th>Progress</th>
                 <th>Created</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {userOrders.map((order: DCAOrderCreated) => {
                 const intervalLabel = getIntervalLabel(Number(order.intervalSeconds));
+                const orderExecutions = executions?.filter(e => e.orderId === order.orderId) || [];
+                const completedCount = orderExecutions.length;
                 return (
                   <tr key={order.id}>
                     <td className="font-mono">#{order.orderId.toString()}</td>
@@ -73,14 +111,25 @@ export function DCAOrdersTable() {
                     <td>
                       <div className="flex items-center gap-2">
                         <progress
-                          className="progress progress-primary w-20"
-                          value={0}
+                          className={`progress w-20 ${completedCount >= Number(order.totalExecutions) ? "progress-success" : "progress-primary"}`}
+                          value={completedCount}
                           max={Number(order.totalExecutions)}
                         ></progress>
-                        <span className="text-sm">0/{order.totalExecutions.toString()}</span>
+                        <span className="text-sm">
+                          {completedCount}/{order.totalExecutions.toString()}
+                        </span>
                       </div>
                     </td>
                     <td className="text-sm">{new Date(Number(order.timestamp) * 1000).toLocaleDateString()}</td>
+                    <td>
+                      <button
+                        className="btn btn-xs btn-primary shadow-sm hover:scale-105 transition-all"
+                        onClick={() => handleExecute(order.orderId)}
+                        disabled={isPending || completedCount >= Number(order.totalExecutions)}
+                      >
+                        {isPending ? "..." : "⚡ Execute"}
+                      </button>
+                    </td>
                   </tr>
                 );
               })}

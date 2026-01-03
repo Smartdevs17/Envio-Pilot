@@ -21,6 +21,13 @@ const DCA_ABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [{ name: "orderId", type: "uint256" }],
+    name: "executeDCAOrder",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;
 
 // Contract ABI for trades
