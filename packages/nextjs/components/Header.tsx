@@ -25,6 +25,11 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/dashboard",
   },
   {
+    label: "AI Chat",
+    href: "/ai",
+    icon: <span>🤖</span>,
+  },
+  {
     label: "DCA Orders",
     href: "/dca",
   },
