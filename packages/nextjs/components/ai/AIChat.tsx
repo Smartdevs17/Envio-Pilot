@@ -52,7 +52,13 @@ export function AIChat() {
 
     try {
       // Check if this is a confirmation for a pending action
-      if (pendingAction && (userMessage === "yes" || userMessage === "confirm" || userMessage === "proceed")) {
+      const isConfirmed = ["yes", "confirm", "proceed", "yep", "sure", "agree", "do it", "ok", "alright"].includes(
+        userMessage,
+      );
+
+      console.log("Chat Debug:", { userMessage, isConfirmed, hasPendingAction: !!pendingAction });
+
+      if (pendingAction && isConfirmed) {
         setMessages(prev => [...prev, { role: "assistant", content: "🚀 Executing your request..." }]);
 
         let hash: string | undefined;
@@ -183,11 +189,11 @@ export function AIChat() {
               </div>
               <div className="flex gap-2">
                 <button
-                  className="btn btn-sm btn-primary flex-1"
+                  className="btn btn-sm btn-primary flex-1 shadow-lg border-2 border-white/20 animate-pulse"
                   onClick={() => handleSend("YES")}
                   disabled={isLoading}
                 >
-                  {isLoading ? "Executing..." : "Proceed & Execute"}
+                  {isLoading ? "Executing..." : "✅ Proceed & Execute"}
                 </button>
                 <button
                   className="btn btn-sm btn-ghost"
