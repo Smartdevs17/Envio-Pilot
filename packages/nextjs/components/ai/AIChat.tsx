@@ -8,6 +8,12 @@ import { parseDCAIntent, prepareDCATransaction } from "~~/services/ai/contractEx
 
 export function AIChat() {
   const { address, isConnected } = useAccount();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [messages, setMessages] = useState<AIMessage[]>([
     {
       role: "assistant",
@@ -119,7 +125,7 @@ export function AIChat() {
       <div className="card-body flex flex-col p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="card-title">🤖 AI Agent</h2>
-          {!isConnected && (
+          {mounted && !isConnected && (
             <div className="badge badge-warning badge-sm">Connect wallet for personalized responses</div>
           )}
         </div>
@@ -185,7 +191,7 @@ export function AIChat() {
               <input
                 type="text"
                 placeholder={
-                  isConnected
+                  mounted && isConnected
                     ? "Ask me about your permissions, trades, or create a DCA order..."
                     : "Connect your wallet to get started..."
                 }
@@ -203,7 +209,7 @@ export function AIChat() {
         </div>
 
         {/* Suggestions */}
-        {!pendingAction && messages.length === 1 && isConnected && (
+        {!pendingAction && messages.length === 1 && mounted && isConnected && (
           <div className="flex gap-2 mt-2 flex-wrap">
             <button className="btn btn-xs btn-outline" onClick={() => setInput("What are my active permissions?")}>
               My permissions
