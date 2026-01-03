@@ -28,17 +28,19 @@ export function AIChat() {
   }, [messages]);
 
   const { writeContractAsync } = useWriteContract();
-  const { grantedPermissions } = usePermissions();
+  usePermissions();
   const [pendingAction, setPendingAction] = useState<{ type: string; data: any } | null>(null);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (confirmation?: string) => {
+    if (!confirmation && (!input.trim() || isLoading)) return;
 
-    const userMessage = input.trim().toLowerCase();
-    setInput("");
+    const userMessage = confirmation ? confirmation.toLowerCase() : input.trim().toLowerCase();
+    const displayMessage = confirmation || input.trim();
+
+    if (!confirmation) setInput("");
 
     // Add user message to chat
-    const newMessages: AIMessage[] = [...messages, { role: "user", content: input.trim() }];
+    const newMessages: AIMessage[] = [...messages, { role: "user", content: displayMessage }];
     setMessages(newMessages);
     setIsLoading(true);
 
@@ -58,14 +60,8 @@ export function AIChat() {
               tokenPair: params.tokenPair || "ETH/USDC",
             });
 
-            // If we have permissions, try to redeem/delegate
-            if (grantedPermissions && grantedPermissions.length > 0) {
-              // This is a simplified version, ideally we'd use a generic redeem helper
-              // For now, we'll use the standard write if redeem logic isn't generic yet
-              hash = await writeContractAsync(tx);
-            } else {
-              hash = await writeContractAsync(tx);
-            }
+            // Trigger the transaction
+            hash = await writeContractAsync(tx);
           }
         } else if (pendingAction.type === "trade") {
           // Similar logic for trade...
@@ -96,7 +92,7 @@ export function AIChat() {
       }
 
       // Process with AI
-      const response = await processAIMessage(input.trim(), address, messages);
+      const response = await processAIMessage(displayMessage, address, messages);
 
       // Add AI response
       setMessages([...newMessages, { role: "assistant", content: response.message }]);
@@ -162,28 +158,61 @@ export function AIChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder={
-              isConnected
-                ? "Ask me about your permissions, trades, or create a DCA order..."
-                : "Connect your wallet to get started..."
-            }
-            className="input input-bordered flex-1"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={isLoading}
-          />
-          <button className="btn btn-primary" onClick={handleSend} disabled={isLoading || !input.trim()}>
-            {isLoading ? <span className="loading loading-spinner loading-sm"></span> : "Send"}
-          </button>
+        {/* Input & Actions */}
+        <div className="flex flex-col gap-2">
+          {pendingAction ? (
+            <div className="flex flex-col gap-2 p-3 bg-base-200 rounded-lg border border-primary/20">
+              <div className="text-sm font-medium mb-1 flex items-center gap-2">
+                <span className="loading loading-ring loading-xs"></span>
+                Waiting for confirmation...
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="btn btn-sm btn-primary flex-1"
+                  onClick={() => handleSend("YES")}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Executing..." : "Proceed & Execute"}
+                </button>
+                <button
+                  className="btn btn-sm btn-ghost"
+                  onClick={() => {
+                    setPendingAction(null);
+                    setMessages(prev => [
+                      ...prev,
+                      { role: "assistant", content: "Action cancelled. How else can I help?" },
+                    ]);
+                  }}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder={
+                  isConnected
+                    ? "Ask me about your permissions, trades, or create a DCA order..."
+                    : "Connect your wallet to get started..."
+                }
+                className="input input-bordered flex-1"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={isLoading}
+              />
+              <button className="btn btn-primary" onClick={() => handleSend()} disabled={isLoading || !input.trim()}>
+                {isLoading ? <span className="loading loading-spinner loading-sm"></span> : "Send"}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Suggestions */}
-        {messages.length === 1 && isConnected && (
+        {!pendingAction && messages.length === 1 && isConnected && (
           <div className="flex gap-2 mt-2 flex-wrap">
             <button className="btn btn-xs btn-outline" onClick={() => setInput("What are my active permissions?")}>
               My permissions
