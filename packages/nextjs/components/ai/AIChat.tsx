@@ -29,7 +29,7 @@ export function AIChat() {
 
   const { writeContractAsync } = useWriteContract();
   usePermissions();
-  const [pendingAction, setPendingAction] = useState<{ type: string; data: any } | null>(null);
+  const [pendingAction, setPendingAction] = useState<{ type: string; params: any } | null>(null);
 
   const handleSend = async (confirmation?: string) => {
     if (!confirmation && (!input.trim() || isLoading)) return;
@@ -51,30 +51,15 @@ export function AIChat() {
 
         let hash: string | undefined;
 
-        if (pendingAction.type === "dca") {
-          const params = parseDCAIntent(messages[messages.length - 1].content);
-          if (params && params.amount) {
-            const tx = prepareDCATransaction({
-              amount: params.amount,
-              interval: params.interval || "weekly",
-              tokenPair: params.tokenPair || "ETH/USDC",
-            });
-
-            // Trigger the transaction
-            hash = await writeContractAsync(tx);
-          }
+        if (pendingAction.type === "dca" && pendingAction.params) {
+          const tx = prepareDCATransaction({
+            amount: pendingAction.params.amount,
+            interval: pendingAction.params.interval || "weekly",
+            tokenPair: pendingAction.params.tokenPair || "ETH/USDC",
+          });
+          hash = await writeContractAsync(tx);
         } else if (pendingAction.type === "trade") {
-          // Similar logic for trade...
-          setMessages(prev => [
-            ...prev,
-            {
-              role: "assistant",
-              content: "Execution for manual trades is still being refined. Please use the 'Trade' page for now.",
-            },
-          ]);
-          setIsLoading(false);
-          setPendingAction(null);
-          return;
+          // ... (Trade logic if needed)
         }
 
         if (hash) {
@@ -82,7 +67,7 @@ export function AIChat() {
             ...prev,
             {
               role: "assistant",
-              content: `✅ Success! Your DCA order has been submitted. Envio will index it shortly.\n\n[View on Etherscan](https://sepolia.etherscan.io/tx/${hash})`,
+              content: `✅ Success! Your DCA order has been submitted. Envio will index it shortly.\n\n🔗 [View on Sepolia Etherscan](https://sepolia.etherscan.io/tx/${hash})`,
             },
           ]);
         }
@@ -99,8 +84,14 @@ export function AIChat() {
 
       // Handle action if needed
       if (response.action) {
-        setPendingAction({ type: response.action.data.intent, data: response.action.data });
-        // The AI already asks "Shall I proceed?" based on the system prompt
+        const intent = response.action.data.intent;
+        let params = null;
+
+        if (intent === "dca") {
+          params = parseDCAIntent(displayMessage);
+        }
+
+        setPendingAction({ type: intent, params });
       }
     } catch (err: any) {
       console.error("Chat error:", err);

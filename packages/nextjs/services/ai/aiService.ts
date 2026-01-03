@@ -119,16 +119,18 @@ Use this context to provide accurate, personalized responses.
  * Detect if message requires contract execution
  */
 function detectActionIntent(message: string): string | null {
-  const executionKeywords = {
-    dca: ["create dca", "set up dca", "dca order", "buy every", "recurring swap", "automated dca"],
-    trade: ["buy", "sell", "swap", "trade", "exchange"],
-    permission: ["grant permission", "approve", "allow", "request permission"],
-  };
+  const msg = message.toLowerCase();
 
-  for (const [intent, keywords] of Object.entries(executionKeywords)) {
-    if (keywords.some(keyword => message.includes(keyword))) {
-      return intent;
-    }
+  if (msg.includes("dca") || (msg.includes("buy") && msg.includes("every"))) {
+    return "dca";
+  }
+
+  if (msg.includes("swap") || msg.includes("trade") || msg.includes("exchange")) {
+    return "trade";
+  }
+
+  if (msg.includes("permission") || msg.includes("approve") || msg.includes("grant")) {
+    return "permission";
   }
 
   return null;
