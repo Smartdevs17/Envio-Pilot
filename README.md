@@ -73,6 +73,7 @@ Run smart contract test with `yarn hardhat:test`
 ### 🔐 Advanced Permissions Usage (ERC-7715)
 EnvioPilot leverages MetaMask's Advanced Permissions to enable a seamless "Set & Forget" trading experience. Users grant a periodic allowance and execution permission to a session account, which then executes trades on their behalf without requiring manual confirmation for every transaction.
 
+- **Smart Contracts Repository**: [GitHub: envio-pilot-contracts](https://github.com/Smartdevs17/envio-pilot-contracts)
 - **Requesting Permissions**: We use `erc7715ProviderActions` to request periodic native token allowances.
   - [Code: Request Permissions](https://github.com/smartdev_x/envio-pilot/blob/main/frontend/packages/nextjs/app/erc-7715-permissions/hooks/usePermissions.ts#L45-L120)
 - **Redeeming Permissions**: We use `erc7710BundlerActions` and `sendUserOperationWithDelegation` to execute trades using the granted permissions.
