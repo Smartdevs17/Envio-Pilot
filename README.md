@@ -89,7 +89,7 @@ We use Envio's hyper-fast indexing to power our **AI Agent**, providing users wi
 
 ### 💬 Feedback
 We've documented our journey and feedback regarding the integration of MetaMask Advanced Permissions and Envio.
-- **Journey & Feedback**: [HackMD Feedback Link](https://hackmd.io/placeholder)
+- **Journey & Feedback**: [HackMD Feedback](https://hackmd.io/@ellcs/B1pebUlPd)
 - **GitHub Issue**: We've opened an issue regarding the need for standardized context management in the `smart-accounts-kit`: [Issue #121](https://github.com/MetaMask/smart-accounts-kit/issues/121)
 
 ### 📱 Social Media
