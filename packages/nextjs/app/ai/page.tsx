@@ -2,11 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useAccount } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 import { type AIMessage, processAIMessage } from "~~/services/ai/aiService";
+import { parseDCAIntent, prepareDCATransaction } from "~~/services/ai/contractExecutionService";
 
 export default function AIPage() {
   const { address, isConnected } = useAccount();
+  const [mounted, setMounted] = useState(false);
+  const { writeContractAsync } = useWriteContract();
+  const [pendingAction, setPendingAction] = useState<{ type: string; params: any } | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [messages, setMessages] = useState<AIMessage[]>([
     {
       role: "assistant",
@@ -35,28 +44,92 @@ export default function AIPage() {
     }
   }, [input]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (confirmation?: string) => {
+    if (!confirmation && (!input.trim() || isLoading)) return;
 
-    const userMessage = input.trim();
-    setInput("");
+    const userMessage = confirmation ? confirmation.toLowerCase() : input.trim().toLowerCase();
+    const displayMessage = confirmation || input.trim();
 
-    const newMessages: AIMessage[] = [...messages, { role: "user", content: userMessage }];
+    if (!confirmation) setInput("");
+
+    // Add user message to chat
+    const newMessages: AIMessage[] = [...messages, { role: "user", content: displayMessage }];
     setMessages(newMessages);
     setIsLoading(true);
 
     try {
-      // Regular AI response
-      const response = await processAIMessage(userMessage, address, messages);
+      // Check if this is a confirmation for a pending action
+      const isConfirmed = ["yes", "confirm", "proceed", "yep", "sure", "agree", "do it", "ok", "alright"].includes(
+        userMessage,
+      );
+
+      console.log("Chat Debug:", { userMessage, isConfirmed, hasPendingAction: !!pendingAction });
+
+      if (pendingAction && isConfirmed) {
+        setMessages(prev => [...prev, { role: "assistant", content: "🚀 Executing your request..." }]);
+
+        let hash: string | undefined;
+
+        if (pendingAction.type === "dca" && pendingAction.params) {
+          try {
+            const tx = prepareDCATransaction({
+              amount: pendingAction.params.amount,
+              interval: pendingAction.params.interval || "daily",
+              tokenPair: pendingAction.params.tokenPair || "ETH/USDC",
+            });
+            hash = await writeContractAsync(tx);
+          } catch (execErr: any) {
+            console.error("Execution error:", execErr);
+            setMessages(prev => [
+              ...prev,
+              {
+                role: "assistant",
+                content: `❌ Execution failed: ${execErr.shortMessage || execErr.message || "Unknown error"}. Please check your connection and wallet balance.`,
+              },
+            ]);
+            setPendingAction(null);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        if (hash) {
+          setMessages(prev => [
+            ...prev,
+            {
+              role: "assistant",
+              content: `✅ Success! Your DCA order has been submitted. Envio will index it shortly.\n\n🔗 [View on Sepolia Etherscan](https://sepolia.etherscan.io/tx/${hash})`,
+            },
+          ]);
+        }
+        setPendingAction(null);
+        setIsLoading(false);
+        return;
+      }
+
+      // Process with AI
+      const response = await processAIMessage(displayMessage, address, messages);
+
+      // Add AI response
       setMessages([...newMessages, { role: "assistant", content: response.message }]);
-    } catch {
-      setMessages([
-        ...newMessages,
-        {
-          role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
-        },
-      ]);
+
+      // Handle action if needed
+      if (response.action) {
+        const intent = response.action.data.intent;
+        let params = null;
+
+        if (intent === "dca") {
+          params = parseDCAIntent(displayMessage);
+        }
+
+        setPendingAction({ type: intent, params });
+      }
+    } catch (err: any) {
+      console.error("AI error:", err);
+      const errorMessage = err.message?.includes("401")
+        ? "🔑 RPC Error: Unauthorized. Your Alchemy API key might be invalid or restricted."
+        : "Sorry, I encountered an error. Please try again.";
+      setMessages(prev => [...prev, { role: "assistant", content: errorMessage }]);
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +163,7 @@ export default function AIPage() {
                 AI Assistant
               </h1>
             </div>
-            {!isConnected && (
+            {mounted && !isConnected && (
               <div className="badge badge-warning gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -162,7 +235,7 @@ export default function AIPage() {
           </div>
 
           {/* Suggestions (show only on first message) */}
-          {messages.length === 1 && isConnected && (
+          {messages.length === 1 && mounted && isConnected && (
             <div className="mb-6">
               <p className="text-sm text-base-content/60 mb-3">Try asking:</p>
               <div className="flex flex-wrap gap-2">
@@ -181,49 +254,82 @@ export default function AIPage() {
 
           {/* Input Area */}
           <div className="sticky bottom-0 pb-4">
-            <div className="bg-base-100 rounded-2xl shadow-2xl border border-base-300 p-4">
-              <div className="flex gap-4 items-end">
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder={
-                    isConnected
-                      ? "Ask me anything about your DeFi activity..."
-                      : "Connect your wallet to get started..."
-                  }
-                  disabled={isLoading}
-                  rows={1}
-                  className="flex-1 bg-transparent border-none focus:outline-none resize-none max-h-32 text-base"
-                  style={{ minHeight: "24px" }}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={isLoading || !input.trim()}
-                  className="btn btn-primary btn-circle shadow-lg hover:scale-110 transition-transform"
-                >
-                  {isLoading ? (
-                    <span className="loading loading-spinner loading-sm"></span>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-5 h-5"
+            {pendingAction ? (
+              <div className="bg-base-100 rounded-2xl shadow-2xl border border-primary/20 p-6 animate-in fade-in slide-in-from-bottom-4">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3 text-primary font-medium">
+                    <span className="loading loading-ring loading-md"></span>
+                    Ready to execute your {pendingAction.type.toUpperCase()} request
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleSend("YES")}
+                      disabled={isLoading}
+                      className="btn btn-primary flex-1 shadow-xl hover:scale-105 transition-all text-lg font-bold animate-pulse py-4 h-auto"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                      />
-                    </svg>
-                  )}
-                </button>
+                      {isLoading ? "Processing..." : "🚀 Confirm & Execute"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPendingAction(null);
+                        setMessages(prev => [
+                          ...prev,
+                          { role: "assistant", content: "Action cancelled. How else can I help?" },
+                        ]);
+                      }}
+                      disabled={isLoading}
+                      className="btn btn-ghost px-8"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-base-100 rounded-2xl shadow-2xl border border-base-300 p-4">
+                <div className="flex gap-4 items-end">
+                  <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder={
+                      mounted && isConnected
+                        ? "Ask me anything about your DeFi activity..."
+                        : "Connect your wallet to get started..."
+                    }
+                    disabled={isLoading}
+                    rows={1}
+                    className="flex-1 bg-transparent border-none focus:outline-none resize-none max-h-32 text-base"
+                    style={{ minHeight: "24px" }}
+                  />
+                  <button
+                    onClick={() => handleSend()}
+                    disabled={isLoading || !input.trim()}
+                    className="btn btn-primary btn-circle shadow-lg hover:scale-110 transition-transform"
+                  >
+                    {isLoading ? (
+                      <span className="loading loading-spinner loading-sm"></span>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
             <p className="text-xs text-center text-base-content/40 mt-2">
               AI can make mistakes. Verify important information on-chain.
             </p>
