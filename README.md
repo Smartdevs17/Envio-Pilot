@@ -3,7 +3,7 @@
 <h4 align="center">
   <a href="https://docs.scaffoldeth.io">Documentation</a> |
   <a href="https://scaffoldeth.io">Website</a> |
-  <a href="https://envio-pilot-9gv6rrmvh-smartdevs17s-projects.vercel.app">Live App</a>
+  <a href="https://envio-pilot.vercel.app">Live App</a>
 </h4>
 
 ---
